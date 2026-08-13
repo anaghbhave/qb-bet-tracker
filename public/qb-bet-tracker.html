@@ -633,8 +633,8 @@ async function fetchTeamWins(slug){
   const res = await fetch(`/api/espn?kind=team&value=${encodeURIComponent(slug)}`);
   if(!res.ok) throw new Error('espn team request failed');
   const data = await res.json();
-  const items = (data.team && data.team.record && data.team.record.items) || [];
-  const overall = items.find(i=>i.type==='total') || items[0];
+  const items = data.items || [];
+  const overall = items.find(i=>i.type==='total' || i.name==='overall') || items[0];
   if(!overall) return null;
   const winsStat = (overall.stats||[]).find(s=>s.name==='wins');
   return winsStat ? winsStat.value : null;

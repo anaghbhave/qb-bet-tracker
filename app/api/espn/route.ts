@@ -1,5 +1,6 @@
 const ATHLETE_IDS = new Set(["4426348", "2577417"]);
-const TEAM_SLUGS = new Set(["wsh", "dal"]);
+const TEAM_IDS: Record<string, string> = { wsh: "28", dal: "6" };
+const SEASON_YEAR = "2026";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -9,8 +10,8 @@ export async function GET(request: Request) {
   let upstreamUrl: string;
   if (kind === "athlete" && ATHLETE_IDS.has(value)) {
     upstreamUrl = `https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/${value}/stats`;
-  } else if (kind === "team" && TEAM_SLUGS.has(value)) {
-    upstreamUrl = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/${value}`;
+  } else if (kind === "team" && TEAM_IDS[value]) {
+    upstreamUrl = `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON_YEAR}/types/2/teams/${TEAM_IDS[value]}/record?lang=en&region=us`;
   } else {
     return Response.json({ error: "Unsupported ESPN request." }, { status: 400 });
   }
