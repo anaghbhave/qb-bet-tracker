@@ -37,4 +37,8 @@ test("ships shared persistence and same-origin ESPN access", async () => {
   assert.match(tracker, /\/api\/espn\?kind=team/);
   assert.doesNotMatch(tracker, /window\.storage/);
   assert.match(tracker, /aria-label="Jayden Daniels QBR"/);
+  assert.match(tracker, /season: 2026/);
+  assert.match(tracker, /cat\.statistics\.find\(s=>s\.season && s\.season\.year===SEASON_YEAR\)/);
+  assert.doesNotMatch(tracker, /cat\.statistics\[cat\.statistics\.length-1\]/);
+  assert.match(tracker, /qbr:0, rtg:0, td:0, int:0, wins:0/);
 });

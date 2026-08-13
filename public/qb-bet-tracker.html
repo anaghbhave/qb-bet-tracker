@@ -401,9 +401,10 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 const FIELDS = ['qbr','rtg','td','int','wins'];
 const PLAYERS = ['daniels','prescott'];
 
-function emptyStats(){ return {qbr:'', rtg:'', td:'', int:'', wins:''}; }
+function emptyStats(){ return {qbr:0, rtg:0, td:0, int:0, wins:0}; }
 
 let state = {
+  season: 2026,
   week: 1,
   lastSaved: null,
   lastRefreshed: null,
@@ -515,7 +516,11 @@ function render(){
 
   const statusEl = document.getElementById('status');
   const decided = Object.values(results).filter(r=>r!==null).length;
-  if(scoreD>=3){
+  const allZero = FIELDS.every(field=>num(d[field])===0 && num(p[field])===0);
+  if(allZero){
+    statusEl.textContent = '2026 season baseline · all stats are currently 0.';
+    statusEl.className = 'status';
+  } else if(scoreD>=3){
     statusEl.textContent = `🏆 Jayden Daniels wins the bet for Evan "Gordo" Dharia — ${scoreD} of 5 categories locked up.`;
     statusEl.className = 'status winner';
   } else if(scoreP>=3){
@@ -590,7 +595,9 @@ async function loadState(){
     const response = await fetch('/api/state', {cache:'no-store'});
     if(response.ok){
       const result = await response.json();
-      if(result.state) state = Object.assign(state, result.state);
+      if(result.state && result.state.season === 2026){
+        state = Object.assign(state, result.state);
+      }
     }
   }catch(e){
     // no saved state yet, fine
@@ -614,7 +621,7 @@ async function fetchAthleteStats(athleteId){
   const data = await res.json();
   const passing = (data.categories||[]).find(c=>c.name==='passing');
   const scoring = (data.categories||[]).find(c=>c.name==='scoring');
-  const pickRow = (cat)=> cat && cat.statistics && (cat.statistics.find(s=>s.season && s.season.year===SEASON_YEAR) || cat.statistics[cat.statistics.length-1]);
+  const pickRow = (cat)=> cat && cat.statistics && cat.statistics.find(s=>s.season && s.season.year===SEASON_YEAR);
   const pRow = pickRow(passing);
   const sRow = pickRow(scoring);
   const out = { qbr:null, rtg:null, td:null, int:null, season:null };
@@ -662,17 +669,17 @@ async function pullFromESPN(){
       fetchTeamWins(ESPN_TEAM_SLUG.prescott)
     ]);
 
-    if(dStats.qbr!=null) state.current.daniels.qbr = dStats.qbr;
-    if(dStats.rtg!=null) state.current.daniels.rtg = dStats.rtg;
-    if(dStats.td!=null)  state.current.daniels.td  = dStats.td;
-    if(dStats.int!=null) state.current.daniels.int = dStats.int;
-    if(dWins!=null)      state.current.daniels.wins = dWins;
+    state.current.daniels.qbr = dStats.qbr ?? 0;
+    state.current.daniels.rtg = dStats.rtg ?? 0;
+    state.current.daniels.td = dStats.td ?? 0;
+    state.current.daniels.int = dStats.int ?? 0;
+    state.current.daniels.wins = dWins ?? 0;
 
-    if(pStats.qbr!=null) state.current.prescott.qbr = pStats.qbr;
-    if(pStats.rtg!=null) state.current.prescott.rtg = pStats.rtg;
-    if(pStats.td!=null)  state.current.prescott.td  = pStats.td;
-    if(pStats.int!=null) state.current.prescott.int = pStats.int;
-    if(pWins!=null)      state.current.prescott.wins = pWins;
+    state.current.prescott.qbr = pStats.qbr ?? 0;
+    state.current.prescott.rtg = pStats.rtg ?? 0;
+    state.current.prescott.td = pStats.td ?? 0;
+    state.current.prescott.int = pStats.int ?? 0;
+    state.current.prescott.wins = pWins ?? 0;
 
     state.lastRefreshed = new Date().toISOString();
 
@@ -680,8 +687,7 @@ async function pullFromESPN(){
     render();
     saveState();
     const now = new Date();
-    const seasonLabel = dStats.season || pStats.season || SEASON_YEAR;
-    statusEl.textContent = `✓ Pulled live ${seasonLabel} stats from ESPN at ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}. Everything below is still editable if something looks off.`;
+    statusEl.textContent = `✓ Pulled 2026 stats from ESPN at ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}. Stats ESPN has not published yet remain 0.`;
   }catch(e){
     statusEl.textContent = "Couldn't reach ESPN right now. Try again in a moment, or enter the stats manually below.";
   }finally{
