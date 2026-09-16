@@ -26,7 +26,7 @@ async function loadScoring() {
   const pure = script.slice(0, script.indexOf("/* ---------- rendering ---------- */"));
   return new Function(
     `${pure}
-     return { state, num, ratioValue, compareCategory, compareRatio, computeResults };`,
+     return { state, num, ratioValue, compareCategory, compareRatio, computeResults, betState };`,
   )();
 }
 
@@ -123,6 +123,22 @@ test("scores the real week 1 2026 slate as Daniels 2, Prescott 1, two dead even"
   assert.equal(results.wins.winner, "push", "both teams are 0-1");
 
   assert.deepEqual(score(results), { daniels: 2, prescott: 1, even: 2 });
+});
+
+test("the category leader wins outright; ties do not have to be settled", async () => {
+  const { betState } = await loadScoring();
+  const tracker = await readFile(TRACKER_URL, "utf8");
+
+  // There is no threshold to clear: 2-1 with two dead even is a win, not a stall.
+  assert.equal(betState(2, 1), "daniels");
+  assert.equal(betState(1, 2), "prescott");
+  assert.equal(betState(1, 0), "daniels");
+  // Only a level category count is an actual tie.
+  assert.equal(betState(2, 2), "level");
+  assert.equal(betState(0, 0), "level");
+
+  assert.doesNotMatch(tracker, /clinch/i, "the bet is not a race to three");
+  assert.doesNotMatch(tracker, /score[DP] >= 3/);
 });
 
 test("a category with no data anywhere stays undecided", async () => {

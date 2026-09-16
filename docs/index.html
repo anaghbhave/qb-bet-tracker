@@ -535,6 +535,15 @@ function computeResults(){
   };
 }
 
+/* Whoever leads more categories takes the bet. Dead-even categories simply go
+   unclaimed — they never have to be settled for someone to win, and there is no
+   threshold to clear. Only a level category count is a real tie. */
+function betState(scoreD, scoreP){
+  if(scoreD > scoreP) return 'daniels';
+  if(scoreP > scoreD) return 'prescott';
+  return 'level';
+}
+
 /* ---------- rendering ---------- */
 
 function setText(id, text){
@@ -622,17 +631,23 @@ function renderTiebreak(results, scoreD, scoreP, anyData){
     return;
   }
 
-  const overallTied = scoreD === scoreP;
-  strip.classList.toggle('live', overallTied || even.length > 0);
+  // A tie only matters when it leaves the category count level. If someone is
+  // ahead, dead-even categories just sit unclaimed and the lead still wins.
+  const winning = betState(scoreD, scoreP);
+  const leaderName = winning === 'daniels' ? 'Daniels' : 'Prescott';
+  const high = Math.max(scoreD, scoreP), low = Math.min(scoreD, scoreP);
+  const evenLabel = `${even.length} categor${even.length===1?'y':'ies'} dead even`;
 
-  if(overallTied && even.length > 0){
-    headline.textContent = `Level at ${scoreD}–${scoreP} · ${even.length} categor${even.length===1?'y is':'ies are'} dead even and would settle it`;
-  } else if(overallTied){
-    headline.textContent = `Level at ${scoreD}–${scoreP} · no category is dead even, so any flip breaks the tie`;
+  strip.classList.toggle('live', winning === 'level');
+
+  if(winning === 'level' && even.length > 0){
+    headline.textContent = `Bet is level at ${scoreD}–${scoreP} · ${evenLabel} — settling ${even.length===1?'it':'any of them'} decides the bet`;
+  } else if(winning === 'level'){
+    headline.textContent = `Bet is level at ${scoreD}–${scoreP} · the next category to flip decides it`;
   } else if(even.length > 0){
-    headline.textContent = `${even.length} categor${even.length===1?'y':'ies'} dead even · neither side owns ${even.length===1?'it':'them'} yet`;
+    headline.textContent = `${evenLabel} · they stay unclaimed, ${leaderName} still wins it ${high}–${low}`;
   } else {
-    headline.textContent = 'No ties · every category has a clear leader';
+    headline.textContent = `No ties · ${leaderName} wins it ${high}–${low} as it stands`;
   }
 }
 
@@ -646,25 +661,31 @@ function renderScore(results, scoreD, scoreP, anyData){
   const statusEl = document.getElementById('status');
   const decided = CATEGORIES.filter(c => results[c.key].winner !== null).length;
 
+  const evenCount = CATEGORIES.filter(c => results[c.key].winner === 'push').length;
+  const evenTail = evenCount === 0
+    ? ''
+    : `, with ${evenCount} dead even`;
+
   if(!anyData){
     statusEl.textContent = 'Pulling the latest from ESPN…';
     statusEl.className = 'status';
-  } else if(scoreD >= 3){
-    statusEl.textContent = `🏆 Jayden Daniels leads ${scoreD} of 5 categories — enough to win it for Evan "Gordo" Dharia if the season ended today.`;
-    statusEl.className = 'status winner';
-  } else if(scoreP >= 3){
-    statusEl.textContent = `🏆 Dak Prescott leads ${scoreP} of 5 categories — enough to win it for DG "Baldhead" Archer if the season ended today.`;
-    statusEl.className = 'status winner';
-  } else if(decided === 0){
+    return;
+  }
+  if(decided === 0){
     statusEl.textContent = 'ESPN has not published any 2026 stats yet.';
     statusEl.className = 'status';
+    return;
+  }
+
+  const winning = betState(scoreD, scoreP);
+  if(winning === 'daniels'){
+    statusEl.textContent = `🏆 Jayden Daniels takes it for Evan "Gordo" Dharia if the season ended today — ${scoreD} categories to ${scoreP}${evenTail}.`;
+    statusEl.className = 'status winner';
+  } else if(winning === 'prescott'){
+    statusEl.textContent = `🏆 Dak Prescott takes it for DG "Baldhead" Archer if the season ended today — ${scoreP} categories to ${scoreD}${evenTail}.`;
+    statusEl.className = 'status winner';
   } else {
-    const leader = scoreD > scoreP
-      ? `Daniels leads ${scoreD}–${scoreP}`
-      : scoreP > scoreD
-        ? `Prescott leads ${scoreP}–${scoreD}`
-        : `Level at ${scoreD}–${scoreP}`;
-    statusEl.textContent = `${leader} · nobody has the 3 categories it takes to clinch.`;
+    statusEl.textContent = `Dead level at ${scoreD}–${scoreP}${evenTail} — as it stands the bet is a push.`;
     statusEl.className = 'status';
   }
 }
