@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+const TRACKER_URL = new URL("../public/qb-bet-tracker.html", import.meta.url);
+
 async function render() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
@@ -11,6 +13,32 @@ async function render() {
     new Request("http://localhost/", { headers: { accept: "text/html" } }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
     { waitUntil() {}, passThroughOnException() {} },
+  );
+}
+
+/**
+ * The tracker's scoring helpers live above the "rendering" divider and touch no
+ * DOM, so the real source can be evaluated here rather than reimplemented.
+ */
+async function loadScoring() {
+  const tracker = await readFile(TRACKER_URL, "utf8");
+  const script = tracker.slice(tracker.indexOf("const SEASON_YEAR = 2026;"));
+  const pure = script.slice(0, script.indexOf("/* ---------- rendering ---------- */"));
+  return new Function(
+    `${pure}
+     return { state, num, ratioValue, compareCategory, compareRatio, computeResults };`,
+  )();
+}
+
+function score(results) {
+  return Object.values(results).reduce(
+    (acc, result) => {
+      if (result.winner === "a") acc.daniels++;
+      if (result.winner === "b") acc.prescott++;
+      if (result.winner === "push") acc.even++;
+      return acc;
+    },
+    { daniels: 0, prescott: 0, even: 0 },
   );
 }
 
@@ -26,19 +54,105 @@ test("server-renders the tracker shell", async () => {
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
-test("ships shared persistence and same-origin ESPN access", async () => {
-  const tracker = await readFile(
-    new URL("../public/qb-bet-tracker.html", import.meta.url),
-    "utf8",
-  );
+test("pulls every number from ESPN and exposes no editable fields", async () => {
+  const tracker = await readFile(TRACKER_URL, "utf8");
 
-  assert.match(tracker, /fetch\('\/api\/state'/);
-  assert.match(tracker, /\/api\/espn\?kind=athlete/);
-  assert.match(tracker, /\/api\/espn\?kind=team/);
+  assert.match(tracker, /site\.web\.api\.espn\.com/);
+  assert.match(tracker, /sports\.core\.api\.espn\.com/);
+  assert.doesNotMatch(tracker, /\/api\/espn/, "ESPN is called directly, no proxy");
+  assert.doesNotMatch(tracker, /<input/i, "the tracker must be read-only");
+  assert.doesNotMatch(tracker, /contenteditable/i);
+  assert.doesNotMatch(tracker, /\/api\/state/, "shared persistence was removed");
+  assert.doesNotMatch(tracker, /fetch\(['"`]\//, "the page must not depend on same-origin routes");
   assert.doesNotMatch(tracker, /window\.storage/);
-  assert.match(tracker, /aria-label="Jayden Daniels QBR"/);
-  assert.match(tracker, /season: 2026/);
-  assert.match(tracker, /cat\.statistics\.find\(s=>s\.season && s\.season\.year===SEASON_YEAR\)/);
-  assert.doesNotMatch(tracker, /cat\.statistics\[cat\.statistics\.length-1\]/);
-  assert.match(tracker, /qbr:0, rtg:0, td:0, int:0, wins:0/);
+  assert.match(tracker, /const SEASON_YEAR = 2026;/);
+  assert.match(tracker, /s\.season\.year === SEASON_YEAR/);
+});
+
+test("total touchdowns add passing and rushing, not ESPN's scoring column", async () => {
+  const tracker = await readFile(TRACKER_URL, "utf8");
+
+  // ESPN's "scoring" category TD column counts only TDs the player scored
+  // himself, so reading it drops every touchdown pass.
+  assert.doesNotMatch(tracker, /scoring\.labels\.indexOf\('TD'\)/);
+  assert.match(tracker, /out\.passTd = statFromRow\(passing, passRow, 'TD'\);/);
+  assert.match(tracker, /out\.rushTd = statFromRow\(rushing, rushRow, 'TD'\);/);
+  assert.match(tracker, /\(passTd \?\? 0\) \+ \(rushTd \?\? 0\)/);
+});
+
+test("a clean sheet beats a quarterback with picks in the TD:INT category", async () => {
+  const { compareRatio, ratioValue } = await loadScoring();
+
+  // Week 1, 2026: both threw 2 TDs, Prescott threw the only interception.
+  const daniels = { td: 2, int: 0 };
+  const prescott = { td: 2, int: 1 };
+
+  assert.equal(ratioValue(daniels.td, daniels.int), Infinity);
+  assert.equal(ratioValue(prescott.td, prescott.int), 2);
+  assert.equal(compareRatio(daniels, prescott).winner, "a");
+  assert.equal(compareRatio(prescott, daniels).winner, "b");
+});
+
+test("two clean sheets are broken by touchdown count, not called even", async () => {
+  const { compareRatio } = await loadScoring();
+
+  assert.equal(compareRatio({ td: 5, int: 0 }, { td: 2, int: 0 }).winner, "a");
+  assert.equal(compareRatio({ td: 2, int: 0 }, { td: 5, int: 0 }).winner, "b");
+  assert.equal(compareRatio({ td: 3, int: 0 }, { td: 3, int: 0 }).winner, "push");
+});
+
+test("no touchdowns and no picks does not count as a perfect ratio", async () => {
+  const { ratioValue, compareRatio } = await loadScoring();
+
+  assert.equal(ratioValue(0, 0), 0);
+  // A quarterback with 5 TDs and 1 pick beats one who has done nothing.
+  assert.equal(compareRatio({ td: 0, int: 0 }, { td: 5, int: 1 }).winner, "b");
+});
+
+test("scores the real week 1 2026 slate as Daniels 2, Prescott 1, two dead even", async () => {
+  const scoring = await loadScoring();
+
+  scoring.state.current.daniels = { qbr: "66.4", rtg: "85.9", td: 2, int: "0", wins: 0 };
+  scoring.state.current.prescott = { qbr: "89.0", rtg: "84.8", td: 2, int: "1", wins: 0 };
+
+  const results = scoring.computeResults();
+  assert.equal(results.qbr.winner, "b", "Prescott's 89.0 QBR tops 66.4");
+  assert.equal(results.rtg.winner, "a", "Daniels' 85.9 rating tops 84.8");
+  assert.equal(results.td.winner, "push", "both sit on 2 total touchdowns");
+  assert.equal(results.ratio.winner, "a", "Daniels is the only one without a pick");
+  assert.equal(results.wins.winner, "push", "both teams are 0-1");
+
+  assert.deepEqual(score(results), { daniels: 2, prescott: 1, even: 2 });
+});
+
+test("a category with no data anywhere stays undecided", async () => {
+  const scoring = await loadScoring();
+
+  scoring.state.current.daniels = { qbr: null, rtg: null, td: null, int: null, wins: null };
+  scoring.state.current.prescott = { qbr: null, rtg: null, td: null, int: null, wins: null };
+
+  const results = scoring.computeResults();
+  assert.deepEqual(score(results), { daniels: 0, prescott: 0, even: 0 });
+  assert.equal(results.qbr.winner, null);
+  assert.equal(results.ratio.winner, null);
+});
+
+test("margins are reported so near-ties are visible", async () => {
+  const { compareCategory } = await loadScoring();
+
+  assert.equal(compareCategory(85.9, 84.8, 1).marginLabel, "+1.1");
+  assert.equal(compareCategory(66.4, 89.0, 1).marginLabel, "+22.6");
+  assert.equal(compareCategory(2, 2, 0).marginLabel, "");
+});
+
+test("the GitHub Pages copy is identical to the tracker source", async () => {
+  const [source, published] = await Promise.all([
+    readFile(TRACKER_URL, "utf8"),
+    readFile(new URL("../docs/index.html", import.meta.url), "utf8"),
+  ]);
+  assert.equal(
+    published,
+    source,
+    "docs/index.html has drifted; re-run `npm run sync:pages`",
+  );
 });

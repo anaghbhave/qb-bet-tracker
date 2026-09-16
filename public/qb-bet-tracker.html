@@ -101,7 +101,7 @@ h1{
   grid-template-columns:1fr auto 1fr;
   gap:14px;
   align-items:stretch;
-  margin-bottom:18px;
+  margin-bottom:14px;
 }
 .card{
   border-radius:16px;
@@ -148,6 +148,14 @@ h1{
   color:rgba(245,243,238,0.55);
   font-weight:500;
 }
+.card .scorenote{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:rgba(245,243,238,0.6);
+  margin-top:8px;
+}
 .card.daniels .score{color:var(--gold);}
 .card.prescott .score{color:#DCE4EA;}
 .card.leading{box-shadow:0 0 0 2px var(--amber), 0 0 30px rgba(255,138,0,0.25);}
@@ -168,6 +176,57 @@ h1{
   padding:0 4px;
 }
 .vs .line{width:1px;flex:1;background:var(--line);margin:6px 0;}
+
+/* Tiebreaker strip */
+.tiebreak{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:11px 14px;
+  margin-bottom:12px;
+  background:rgba(255,255,255,0.74);
+  box-shadow:0 8px 24px rgba(29,32,37,0.05);
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px 12px;
+}
+.tiebreak.live{
+  border-color:rgba(255,138,0,0.55);
+  background:rgba(255,138,0,0.07);
+}
+.tiebreak .tb-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--paper-dim);
+  flex:0 0 auto;
+}
+.tiebreak.live .tb-label{color:#9A4D00;}
+.tiebreak .tb-headline{
+  font-size:13px;
+  font-weight:600;
+  color:var(--paper);
+  flex:0 0 auto;
+}
+.tiebreak .tb-chips{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-left:auto;
+}
+.tb-chip{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:600;letter-spacing:0.06em;
+  padding:4px 9px;border-radius:20px;
+  background:rgba(23,25,29,0.07);
+  color:var(--paper-dim);
+  white-space:nowrap;
+}
+.tb-chip.even{
+  background:rgba(255,138,0,0.16);
+  color:#9A4D00;
+}
+.tb-chip.close{
+  background:rgba(23,25,29,0.06);
+  color:var(--paper-dim);
+}
 
 /* Status banner */
 .status{
@@ -205,6 +264,10 @@ h1{
   background:rgba(255,255,255,0.82);
   box-shadow:0 8px 24px rgba(29,32,37,0.045);
 }
+.stat-row.even-cat{
+  border-color:rgba(255,138,0,0.45);
+  background:rgba(255,138,0,0.045);
+}
 .stat-row .label-col{
   grid-column:1 / -1;
   display:flex;align-items:baseline;justify-content:space-between;
@@ -217,30 +280,31 @@ h1{
 }
 .stat-row .fullname{font-size:11px;color:#7A828B;}
 .field{
-  display:flex;align-items:center;gap:8px;
-}
-.field.right{flex-direction:row-reverse;}
-.field input{
-  width:100%;
+  display:flex;flex-direction:column;gap:2px;
   background:#F8F6F0;
   border:1px solid var(--line);
   border-radius:8px;
-  color:var(--paper);
-  font-family:'JetBrains Mono',monospace;
-  font-size:15px;
-  padding:8px 10px;
+  padding:7px 10px;
   text-align:center;
 }
-.field input:focus{
-  outline:2px solid var(--amber);
-  outline-offset:1px;
-  border-color:transparent;
+.field .value{
+  font-family:'JetBrains Mono',monospace;
+  font-size:16px;
+  font-weight:600;
+  color:var(--paper);
+  line-height:1.2;
 }
-.dot{
-  width:10px;height:10px;border-radius:50%;flex:0 0 auto;
-  background:var(--void-2);border:1px solid var(--line);
+.field .value-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:#7A828B;
+  line-height:1.2;
+  min-height:12px;
 }
-.dot.win{background:var(--amber);border-color:var(--amber);}
+.field.win{
+  border-color:rgba(255,138,0,0.5);
+  background:rgba(255,138,0,0.07);
+}
 .mid-pill{
   font-family:'JetBrains Mono',monospace;
   font-size:11px;font-weight:600;letter-spacing:0.06em;
@@ -249,7 +313,7 @@ h1{
 }
 .mid-pill.left{background:rgba(90,20,20,0.10);color:var(--burgundy);}
 .mid-pill.right{background:rgba(4,30,66,0.10);color:var(--navy);}
-.mid-pill.push{background:rgba(23,25,29,0.07);}
+.mid-pill.push{background:rgba(255,138,0,0.16);color:#9A4D00;}
 
 .ratio-note{
   grid-column:1/-1;
@@ -263,11 +327,6 @@ h1{
   border-top:1px solid var(--line);
   padding-top:20px;margin-top:6px;
 }
-.controls label{font-size:12px;color:var(--paper-dim);}
-.controls input[type=number]{
-  width:64px;background:var(--void-2);border:1px solid var(--line);
-  color:var(--paper);border-radius:8px;padding:7px 8px;font-family:'JetBrains Mono',monospace;text-align:center;
-}
 button{
   font-family:'Inter',sans-serif;font-weight:600;font-size:13px;
   border-radius:9px;padding:10px 16px;border:1px solid var(--line);
@@ -276,6 +335,7 @@ button{
 }
 button:hover{border-color:rgba(255,138,0,0.5);}
 button:active{transform:scale(0.97);}
+button:disabled{opacity:0.55;cursor:default;}
 button.primary{background:var(--amber);color:#1a0e00;border-color:var(--amber);}
 button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 .updated{
@@ -283,26 +343,13 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
   font-family:'JetBrains Mono',monospace;
 }
 
-/* History */
-.history{margin-top:30px;}
-.history h2{
-  font-family:'Teko',sans-serif;font-size:22px;font-weight:600;margin:0 0 10px;
-  color:var(--paper-dim);letter-spacing:0.01em;text-align:center;
-}
-.history table{width:100%;border-collapse:collapse;font-size:12px;}
-.history th,.history td{
-  padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;
-  font-family:'JetBrains Mono',monospace;color:var(--paper-dim);
-}
-.history th{color:#7A828B;font-weight:500;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;}
-.history .empty{text-align:center;color:#7A828B;font-size:12px;padding:14px 0;}
-
 @media (max-width:600px){
   .matchup{grid-template-columns:1fr;}
   .vs{flex-direction:row;padding:6px 0;}
   .vs .line{width:auto;height:1px;flex:1;margin:0 8px;}
   .stat-row{grid-template-columns:1fr;}
-  .field.right{flex-direction:row;}
+  .tiebreak{flex-direction:column;align-items:flex-start;}
+  .tiebreak .tb-chips{margin-left:0;}
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -314,7 +361,7 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 <div class="wrap">
   <div class="eyebrow">Tale of the tape · 2026 season</div>
   <h1>THE BET</h1>
-  <div class="sub"><b>Evan "Gordo" Dharia</b> has Jayden Daniels · <b>DG "Baldhead" Archer</b> has Dak Prescott · first to 3 category wins takes it</div>
+  <div class="sub"><b>Evan "Gordo" Dharia</b> has Jayden Daniels · <b>DG "Baldhead" Archer</b> has Dak Prescott · most categories led at season's end takes it</div>
   <div class="refresh-badge" id="refresh-badge">Never refreshed yet</div>
 
   <div class="matchup">
@@ -324,6 +371,7 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
       <div class="name">Jayden Daniels</div>
       <div class="team">Washington Commanders · QB</div>
       <div class="score"><span id="score-daniels">0</span><span class="of">/ 5</span></div>
+      <div class="scorenote">Categories led</div>
     </div>
     <div class="vs">
       <div class="line"></div>
@@ -336,127 +384,289 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
       <div class="name">Dak Prescott</div>
       <div class="team">Dallas Cowboys · QB</div>
       <div class="score"><span id="score-prescott">0</span><span class="of">/ 5</span></div>
+      <div class="scorenote">Categories led</div>
     </div>
   </div>
 
-  <div class="status" id="status">Waiting on the first refresh from ESPN…</div>
+  <div class="tiebreak" id="tiebreak">
+    <span class="tb-label">Tiebreakers</span>
+    <span class="tb-headline" id="tb-headline">Waiting on stats…</span>
+    <div class="tb-chips" id="tb-chips"></div>
+  </div>
+
+  <div class="status" id="status">Pulling the latest from ESPN…</div>
 
   <div class="stats">
 
-    <div class="stat-row">
+    <div class="stat-row" id="row-qbr">
       <div class="label-col"><span class="label">QBR</span><span class="fullname">ESPN Total Quarterback Rating</span></div>
-      <div class="field"><input type="number" step="0.1" id="in-daniels-qbr" placeholder="0.0" aria-label="Jayden Daniels QBR"></div>
+      <div class="field" id="fld-daniels-qbr"><span class="value" id="val-daniels-qbr">—</span><span class="value-sub" id="sub-daniels-qbr"></span></div>
       <div class="mid-pill" id="mid-qbr">—</div>
-      <div class="field right"><input type="number" step="0.1" id="in-prescott-qbr" placeholder="0.0" aria-label="Dak Prescott QBR"></div>
+      <div class="field" id="fld-prescott-qbr"><span class="value" id="val-prescott-qbr">—</span><span class="value-sub" id="sub-prescott-qbr"></span></div>
     </div>
 
-    <div class="stat-row">
+    <div class="stat-row" id="row-rtg">
       <div class="label-col"><span class="label">RTG</span><span class="fullname">Passer Rating</span></div>
-      <div class="field"><input type="number" step="0.1" id="in-daniels-rtg" placeholder="0.0" aria-label="Jayden Daniels passer rating"></div>
+      <div class="field" id="fld-daniels-rtg"><span class="value" id="val-daniels-rtg">—</span><span class="value-sub" id="sub-daniels-rtg"></span></div>
       <div class="mid-pill" id="mid-rtg">—</div>
-      <div class="field right"><input type="number" step="0.1" id="in-prescott-rtg" placeholder="0.0" aria-label="Dak Prescott passer rating"></div>
+      <div class="field" id="fld-prescott-rtg"><span class="value" id="val-prescott-rtg">—</span><span class="value-sub" id="sub-prescott-rtg"></span></div>
     </div>
 
-    <div class="stat-row">
+    <div class="stat-row" id="row-td">
       <div class="label-col"><span class="label">TD</span><span class="fullname">Total Touchdowns (Pass + Rush)</span></div>
-      <div class="field"><input type="number" step="1" id="in-daniels-td" placeholder="0" aria-label="Jayden Daniels total touchdowns"></div>
+      <div class="field" id="fld-daniels-td"><span class="value" id="val-daniels-td">—</span><span class="value-sub" id="sub-daniels-td"></span></div>
       <div class="mid-pill" id="mid-td">—</div>
-      <div class="field right"><input type="number" step="1" id="in-prescott-td" placeholder="0" aria-label="Dak Prescott total touchdowns"></div>
+      <div class="field" id="fld-prescott-td"><span class="value" id="val-prescott-td">—</span><span class="value-sub" id="sub-prescott-td"></span></div>
     </div>
 
-    <div class="stat-row">
-      <div class="label-col"><span class="label">T:I</span><span class="fullname">TD-to-INT Ratio (enter INTs to compute)</span></div>
-      <div class="field"><input type="number" step="1" id="in-daniels-int" placeholder="INTs" aria-label="Jayden Daniels interceptions"></div>
+    <div class="stat-row" id="row-ratio">
+      <div class="label-col"><span class="label">T:I</span><span class="fullname">TD-to-INT Ratio</span></div>
+      <div class="field" id="fld-daniels-ratio"><span class="value" id="val-daniels-ratio">—</span><span class="value-sub" id="sub-daniels-ratio"></span></div>
       <div class="mid-pill" id="mid-ratio">—</div>
-      <div class="field right"><input type="number" step="1" id="in-prescott-int" placeholder="INTs" aria-label="Dak Prescott interceptions"></div>
-      <div class="ratio-note" id="ratio-note">Ratio uses the Total TDs above ÷ INTs entered here.</div>
+      <div class="field" id="fld-prescott-ratio"><span class="value" id="val-prescott-ratio">—</span><span class="value-sub" id="sub-prescott-ratio"></span></div>
+      <div class="ratio-note">Total TDs ÷ interceptions. A clean sheet (TDs, zero picks) shows ∞ and is broken by TD count.</div>
     </div>
 
-    <div class="stat-row">
+    <div class="stat-row" id="row-wins">
       <div class="label-col"><span class="label">W</span><span class="fullname">Team Wins</span></div>
-      <div class="field"><input type="number" step="1" id="in-daniels-wins" placeholder="0" aria-label="Washington Commanders wins"></div>
+      <div class="field" id="fld-daniels-wins"><span class="value" id="val-daniels-wins">—</span><span class="value-sub" id="sub-daniels-wins"></span></div>
       <div class="mid-pill" id="mid-wins">—</div>
-      <div class="field right"><input type="number" step="1" id="in-prescott-wins" placeholder="0" aria-label="Dallas Cowboys wins"></div>
+      <div class="field" id="fld-prescott-wins"><span class="value" id="val-prescott-wins">—</span><span class="value-sub" id="sub-prescott-wins"></span></div>
     </div>
 
   </div>
 
   <div class="controls">
     <button class="primary" id="espn-btn">⟳ Pull latest from ESPN</button>
-    <label for="week">Week</label>
-    <input type="number" id="week" min="1" max="22" value="1">
-    <button id="save-btn">Save snapshot</button>
-    <button id="reset-btn">Reset all</button>
   </div>
-  <div class="updated" id="espn-status">Tap "Pull latest from ESPN" to load live stats, or enter them by hand below.</div>
-  <div class="updated" id="updated">Not saved yet. Shared with anyone who has this link — numbers auto-save as you type and everyone sees the same data.</div>
-
-  <div class="history">
-    <h2>Season log</h2>
-    <div id="history-body"><div class="empty">No snapshots saved yet. Enter stats and hit "Save snapshot" each week to build the log.</div></div>
-  </div>
+  <div class="updated" id="espn-status">Every number on this page comes straight from ESPN. Nothing here is typed in by hand.</div>
 </div>
 
 <script>
-const FIELDS = ['qbr','rtg','td','int','wins'];
+const SEASON_YEAR = 2026;
+const CATEGORIES = [
+  {key:'qbr',   label:'QBR',  decimals:1},
+  {key:'rtg',   label:'RTG',  decimals:1},
+  {key:'td',    label:'TD',   decimals:0},
+  {key:'ratio', label:'T:I',  decimals:2},
+  {key:'wins',  label:'W',    decimals:0}
+];
 const PLAYERS = ['daniels','prescott'];
 
-function emptyStats(){ return {qbr:0, rtg:0, td:0, int:0, wins:0}; }
+const ESPN_ATHLETE_ID = { daniels:'4426348', prescott:'2577417' };
+const ESPN_TEAM_ID    = { daniels:'28',       prescott:'6'       };
+
+// ESPN serves these endpoints with `Access-Control-Allow-Origin: *`, so the page
+// calls them straight from the browser and needs no server of its own.
+const ESPN_ATHLETE_URL = (athleteId) =>
+  `https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/${athleteId}/stats`;
+const ESPN_RECORD_URL = (teamId) =>
+  `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON_YEAR}/types/2/teams/${teamId}/record?lang=en&region=us`;
+
+function emptyStats(){
+  return {qbr:null, rtg:null, passTd:null, rushTd:null, td:null, int:null, wins:null, losses:null, ties:null, record:null, gp:null};
+}
 
 let state = {
-  season: 2026,
-  week: 1,
-  lastSaved: null,
+  season: SEASON_YEAR,
   lastRefreshed: null,
-  current: { daniels: emptyStats(), prescott: emptyStats() },
-  history: []
+  current: { daniels: emptyStats(), prescott: emptyStats() }
 };
 
-function getInputs(){
-  PLAYERS.forEach(p=>{
-    FIELDS.forEach(f=>{
-      const el = document.getElementById(`in-${p}-${f}`);
-      state.current[p][f] = el.value;
-    });
-  });
-  state.week = parseInt(document.getElementById('week').value) || 1;
-}
-
-function setInputs(){
-  PLAYERS.forEach(p=>{
-    FIELDS.forEach(f=>{
-      const el = document.getElementById(`in-${p}-${f}`);
-      el.value = state.current[p][f] ?? '';
-    });
-  });
-  document.getElementById('week').value = state.week;
-}
+/* ---------- number helpers ---------- */
 
 function num(v){
-  const n = parseFloat(v);
-  return isNaN(n) ? null : n;
+  if(v === null || v === undefined || v === '') return null;
+  const n = parseFloat(String(v).replace(/,/g,''));
+  return Number.isNaN(n) ? null : n;
 }
 
-function ratio(td, int){
+function fmt(v, decimals){
+  if(v === null) return '—';
+  if(v === Infinity) return '∞';
+  return v.toFixed(decimals);
+}
+
+/* TD:INT as a comparable number. Infinite only when there are TDs and zero picks. */
+function ratioValue(td, int){
   const t = num(td), i = num(int);
-  if(t===null) return null;
-  if(i===null || i===0) return t===0 ? 0 : Infinity; // no picks thrown = effectively best case, unless also zero TDs
+  if(t === null || i === null) return null;
+  if(i === 0) return t > 0 ? Infinity : 0;
   return t / i;
 }
 
-function compareCategory(a, b){
-  // returns 'a' | 'b' | 'push' | null (null = not enough data)
-  if(a===null && b===null) return null;
-  if(a===null) return 'b';
-  if(b===null) return 'a';
-  if(a===b) return 'push';
-  return a>b ? 'a' : 'b';
+/* ---------- category comparison ---------- */
+
+/* Returns {winner:'a'|'b'|'push'|null, margin:number|null, marginLabel:string} */
+function compareCategory(a, b, decimals){
+  if(a === null && b === null) return {winner:null, margin:null, marginLabel:''};
+  if(a === null) return {winner:'b', margin:null, marginLabel:''};
+  if(b === null) return {winner:'a', margin:null, marginLabel:''};
+  if(a === b) return {winner:'push', margin:0, marginLabel:''};
+
+  const winner = a > b ? 'a' : 'b';
+  let marginLabel = '';
+  if(a !== Infinity && b !== Infinity){
+    marginLabel = '+' + Math.abs(a - b).toFixed(decimals);
+  }
+  return {winner, margin:(a === Infinity || b === Infinity) ? null : Math.abs(a - b), marginLabel};
 }
 
-function fmtRatio(r){
-  if(r===null) return '—';
-  if(r===Infinity) return '∞';
-  return r.toFixed(2);
+/* The T:I category needs its own tiebreak: two clean sheets are split by TD count. */
+function compareRatio(d, p){
+  const dv = ratioValue(d.td, d.int);
+  const pv = ratioValue(p.td, p.int);
+  if(dv === Infinity && pv === Infinity){
+    const result = compareCategory(num(d.td), num(p.td), 0);
+    if(result.winner === 'push') return result;
+    return {winner:result.winner, margin:result.margin, marginLabel:result.marginLabel + ' TD'};
+  }
+  return compareCategory(dv, pv, 2);
+}
+
+function computeResults(){
+  const d = state.current.daniels, p = state.current.prescott;
+  return {
+    qbr:   compareCategory(num(d.qbr),  num(p.qbr),  1),
+    rtg:   compareCategory(num(d.rtg),  num(p.rtg),  1),
+    td:    compareCategory(num(d.td),   num(p.td),   0),
+    ratio: compareRatio(d, p),
+    wins:  compareCategory(num(d.wins), num(p.wins), 0)
+  };
+}
+
+/* ---------- rendering ---------- */
+
+function setText(id, text){
+  const el = document.getElementById(id);
+  if(el) el.textContent = text;
+}
+
+function renderValues(){
+  const d = state.current.daniels, p = state.current.prescott;
+
+  PLAYERS.forEach(who=>{
+    const s = state.current[who];
+    setText(`val-${who}-qbr`, fmt(num(s.qbr), 1));
+    setText(`sub-${who}-qbr`, s.gp === null ? '' : `${s.gp} GP`);
+
+    setText(`val-${who}-rtg`, fmt(num(s.rtg), 1));
+    setText(`sub-${who}-rtg`, '');
+
+    setText(`val-${who}-td`, fmt(num(s.td), 0));
+    setText(`sub-${who}-td`, s.passTd === null && s.rushTd === null
+      ? ''
+      : `${num(s.passTd) ?? 0} pass · ${num(s.rushTd) ?? 0} rush`);
+
+    const rv = ratioValue(s.td, s.int);
+    setText(`val-${who}-ratio`, rv === null ? '—' : (rv === Infinity ? '∞' : rv.toFixed(2)));
+    setText(`sub-${who}-ratio`, s.td === null || s.int === null
+      ? ''
+      : `${num(s.td)} TD · ${num(s.int)} INT`);
+
+    setText(`val-${who}-wins`, fmt(num(s.wins), 0));
+    setText(`sub-${who}-wins`, s.record ? s.record : '');
+  });
+
+  return {d, p};
+}
+
+function pillText(result, decimals){
+  if(result.winner === null) return '—';
+  if(result.winner === 'push') return 'DEAD EVEN';
+  const who = result.winner === 'a' ? '◀ DANIELS' : 'PRESCOTT ▶';
+  return result.marginLabel ? `${who} ${result.marginLabel}` : who;
+}
+
+function renderCategory(cat, result){
+  const pill = document.getElementById(`mid-${cat.key}`);
+  pill.textContent = pillText(result, cat.decimals);
+  pill.classList.remove('left','right','push');
+  if(result.winner === 'a') pill.classList.add('left');
+  else if(result.winner === 'b') pill.classList.add('right');
+  else if(result.winner === 'push') pill.classList.add('push');
+
+  document.getElementById(`row-${cat.key}`).classList.toggle('even-cat', result.winner === 'push');
+
+  PLAYERS.forEach((who, index)=>{
+    const isWinner = result.winner === (index === 0 ? 'a' : 'b');
+    document.getElementById(`fld-${who}-${cat.key}`).classList.toggle('win', isWinner);
+  });
+}
+
+function renderTiebreak(results, scoreD, scoreP, anyData){
+  const strip = document.getElementById('tiebreak');
+  const headline = document.getElementById('tb-headline');
+  const chips = document.getElementById('tb-chips');
+
+  const even = CATEGORIES.filter(c => results[c.key].winner === 'push');
+  const undecided = CATEGORIES.filter(c => results[c.key].winner === null);
+
+  chips.innerHTML = '';
+  even.forEach(c=>{
+    const chip = document.createElement('span');
+    chip.className = 'tb-chip even';
+    chip.textContent = `${c.label} DEAD EVEN`;
+    chips.appendChild(chip);
+  });
+  undecided.forEach(c=>{
+    const chip = document.createElement('span');
+    chip.className = 'tb-chip';
+    chip.textContent = `${c.label} NO DATA`;
+    chips.appendChild(chip);
+  });
+
+  if(!anyData){
+    strip.classList.remove('live');
+    headline.textContent = 'Waiting on stats…';
+    return;
+  }
+
+  const overallTied = scoreD === scoreP;
+  strip.classList.toggle('live', overallTied || even.length > 0);
+
+  if(overallTied && even.length > 0){
+    headline.textContent = `Level at ${scoreD}–${scoreP} · ${even.length} categor${even.length===1?'y is':'ies are'} dead even and would settle it`;
+  } else if(overallTied){
+    headline.textContent = `Level at ${scoreD}–${scoreP} · no category is dead even, so any flip breaks the tie`;
+  } else if(even.length > 0){
+    headline.textContent = `${even.length} categor${even.length===1?'y':'ies'} dead even · neither side owns ${even.length===1?'it':'them'} yet`;
+  } else {
+    headline.textContent = 'No ties · every category has a clear leader';
+  }
+}
+
+function renderScore(results, scoreD, scoreP, anyData){
+  setText('score-daniels', scoreD);
+  setText('score-prescott', scoreP);
+
+  document.getElementById('card-daniels').classList.toggle('leading', scoreD > scoreP);
+  document.getElementById('card-prescott').classList.toggle('leading', scoreP > scoreD);
+
+  const statusEl = document.getElementById('status');
+  const decided = CATEGORIES.filter(c => results[c.key].winner !== null).length;
+
+  if(!anyData){
+    statusEl.textContent = 'Pulling the latest from ESPN…';
+    statusEl.className = 'status';
+  } else if(scoreD >= 3){
+    statusEl.textContent = `🏆 Jayden Daniels leads ${scoreD} of 5 categories — enough to win it for Evan "Gordo" Dharia if the season ended today.`;
+    statusEl.className = 'status winner';
+  } else if(scoreP >= 3){
+    statusEl.textContent = `🏆 Dak Prescott leads ${scoreP} of 5 categories — enough to win it for DG "Baldhead" Archer if the season ended today.`;
+    statusEl.className = 'status winner';
+  } else if(decided === 0){
+    statusEl.textContent = 'ESPN has not published any 2026 stats yet.';
+    statusEl.className = 'status';
+  } else {
+    const leader = scoreD > scoreP
+      ? `Daniels leads ${scoreD}–${scoreP}`
+      : scoreP > scoreD
+        ? `Prescott leads ${scoreP}–${scoreD}`
+        : `Level at ${scoreD}–${scoreP}`;
+    statusEl.textContent = `${leader} · nobody has the 3 categories it takes to clinch.`;
+    statusEl.className = 'status';
+  }
 }
 
 function renderRefreshBadge(){
@@ -469,191 +679,92 @@ function renderRefreshBadge(){
   const d = new Date(state.lastRefreshed);
   const dateStr = d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
   const timeStr = d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
-  const daysAgo = Math.floor((Date.now() - d.getTime()) / 86400000);
-  let ago = 'today';
-  if(daysAgo===1) ago = '1 day ago';
-  else if(daysAgo>1) ago = `${daysAgo} days ago`;
-  badge.innerHTML = `<span class="dotpulse"></span>Last refreshed ${dateStr}, ${timeStr} · ${ago}`;
-  badge.classList.toggle('fresh', daysAgo<1);
+  badge.innerHTML = `<span class="dotpulse"></span>Live from ESPN · ${dateStr}, ${timeStr}`;
+  badge.classList.add('fresh');
+}
+
+function hasAnyData(s){
+  return ['qbr','rtg','td','int','wins'].some(f => s[f] !== null && s[f] !== undefined);
 }
 
 function render(){
-  const d = state.current.daniels, p = state.current.prescott;
-
-  const results = {};
-  results.qbr = compareCategory(num(d.qbr), num(p.qbr));
-  results.rtg = compareCategory(num(d.rtg), num(p.rtg));
-  results.td  = compareCategory(num(d.td), num(p.td));
-  const dRatio = ratio(d.td, d.int), pRatio = ratio(p.td, p.int);
-  results.ratio = compareCategory(dRatio===Infinity?1e9:dRatio, pRatio===Infinity?1e9:pRatio);
-  results.wins = compareCategory(num(d.wins), num(p.wins));
-
-  document.getElementById('mid-qbr').textContent = pillText(results.qbr);
-  document.getElementById('mid-rtg').textContent = pillText(results.rtg);
-  document.getElementById('mid-td').textContent = pillText(results.td);
-  document.getElementById('mid-ratio').textContent = dRatio===null && pRatio===null ? '—' : `${fmtRatio(dRatio)} vs ${fmtRatio(pRatio)}`;
-  document.getElementById('mid-wins').textContent = pillText(results.wins);
-
-  setPillClass('mid-qbr', results.qbr);
-  setPillClass('mid-rtg', results.rtg);
-  setPillClass('mid-td', results.td);
-  setPillClass('mid-ratio', results.ratio);
-  setPillClass('mid-wins', results.wins);
+  renderValues();
+  const results = computeResults();
 
   let scoreD = 0, scoreP = 0;
-  Object.values(results).forEach(r=>{
-    if(r==='a') scoreD++;
-    if(r==='b') scoreP++;
+  CATEGORIES.forEach(cat=>{
+    const result = results[cat.key];
+    renderCategory(cat, result);
+    if(result.winner === 'a') scoreD++;
+    if(result.winner === 'b') scoreP++;
   });
 
-  document.getElementById('score-daniels').textContent = scoreD;
-  document.getElementById('score-prescott').textContent = scoreP;
-
-  const cardD = document.getElementById('card-daniels');
-  const cardP = document.getElementById('card-prescott');
-  cardD.classList.toggle('leading', scoreD>scoreP);
-  cardP.classList.toggle('leading', scoreP>scoreD);
-
-  const statusEl = document.getElementById('status');
-  const decided = Object.values(results).filter(r=>r!==null).length;
-  const allZero = FIELDS.every(field=>num(d[field])===0 && num(p[field])===0);
-  if(allZero){
-    statusEl.textContent = '2026 season baseline · all stats are currently 0.';
-    statusEl.className = 'status';
-  } else if(scoreD>=3){
-    statusEl.textContent = `🏆 Jayden Daniels wins the bet for Evan "Gordo" Dharia — ${scoreD} of 5 categories locked up.`;
-    statusEl.className = 'status winner';
-  } else if(scoreP>=3){
-    statusEl.textContent = `🏆 Dak Prescott wins the bet for DG "Baldhead" Archer — ${scoreP} of 5 categories locked up.`;
-    statusEl.className = 'status winner';
-  } else if(decided===0){
-    statusEl.textContent = "Waiting on the first refresh from ESPN…";
-    statusEl.className = 'status';
-  } else {
-    const leader = scoreD>scoreP ? `Daniels leads ${scoreD}-${scoreP}` : scoreP>scoreD ? `Prescott leads ${scoreP}-${scoreD}` : `Tied ${scoreD}-${scoreP}`;
-    const remaining = 5 - decided;
-    statusEl.textContent = `${leader} · ${remaining} categor${remaining===1?'y':'ies'} still to fill in.`;
-    statusEl.className = 'status';
-  }
-
-  renderHistory();
+  const anyData = hasAnyData(state.current.daniels) || hasAnyData(state.current.prescott);
+  renderScore(results, scoreD, scoreP, anyData);
+  renderTiebreak(results, scoreD, scoreP, anyData);
   renderRefreshBadge();
 }
 
-function pillText(r){
-  if(r===null) return '—';
-  if(r==='push') return 'PUSH';
-  return r==='a' ? '◀ DANIELS' : 'PRESCOTT ▶';
-}
-function setPillClass(id, r){
-  const el = document.getElementById(id);
-  el.classList.remove('left','right','push');
-  if(r==='a') el.classList.add('left');
-  else if(r==='b') el.classList.add('right');
-  else if(r==='push') el.classList.add('push');
-}
+/* ---------- ESPN ---------- */
 
-function renderHistory(){
-  const body = document.getElementById('history-body');
-  if(!state.history.length){
-    body.innerHTML = '<div class="empty">No snapshots saved yet. Enter stats and hit "Save snapshot" each week to build the log.</div>';
-    return;
-  }
-  let rows = state.history.slice().reverse().map(h=>{
-    return `<tr>
-      <td>Wk ${h.week}</td>
-      <td>${h.scoreDaniels}–${h.scorePrescott}</td>
-      <td>${h.daniels.qbr||'—'} / ${h.prescott.qbr||'—'}</td>
-      <td>${h.daniels.rtg||'—'} / ${h.prescott.rtg||'—'}</td>
-      <td>${h.daniels.td||'—'} / ${h.prescott.td||'—'}</td>
-      <td>${h.daniels.wins||'—'} / ${h.prescott.wins||'—'}</td>
-    </tr>`;
-  }).join('');
-  body.innerHTML = `<table>
-    <thead><tr><th>Week</th><th>Score</th><th>QBR (D/P)</th><th>RTG (D/P)</th><th>TD (D/P)</th><th>W (D/P)</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+function statFromRow(category, row, label){
+  if(!category || !row) return null;
+  const index = (category.labels || []).indexOf(label);
+  if(index < 0) return null;
+  const raw = row.stats[index];
+  return raw === undefined ? null : raw;
 }
-
-async function saveState(){
-  try{
-    const response = await fetch('/api/state', {
-      method: 'PUT',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({state})
-    });
-    if(!response.ok) throw new Error('save failed');
-    const now = new Date();
-    document.getElementById('updated').textContent = `Saved · ${now.toLocaleDateString()} ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
-  }catch(e){
-    document.getElementById('updated').textContent = 'Could not save the shared scoreboard. Try again in a moment.';
-  }
-}
-
-async function loadState(){
-  try{
-    const response = await fetch('/api/state', {cache:'no-store'});
-    if(response.ok){
-      const result = await response.json();
-      if(result.state && result.state.season === 2026){
-        state = Object.assign(state, result.state);
-      }
-    }
-  }catch(e){
-    // no saved state yet, fine
-  }
-  setInputs();
-  render();
-
-  if(!hasAnyData(state.current.daniels) && !hasAnyData(state.current.prescott)){
-    pullFromESPN();
-  }
-}
-
-// ---- ESPN live data ----
-const ESPN_ATHLETE_ID = { daniels: '4426348', prescott: '2577417' };
-const ESPN_TEAM_SLUG   = { daniels: 'wsh', prescott: 'dal' };
-const SEASON_YEAR = 2026;
 
 async function fetchAthleteStats(athleteId){
-  const res = await fetch(`/api/espn?kind=athlete&value=${encodeURIComponent(athleteId)}`);
+  const res = await fetch(ESPN_ATHLETE_URL(athleteId), {cache:'no-store'});
   if(!res.ok) throw new Error('espn athlete stats request failed');
   const data = await res.json();
-  const passing = (data.categories||[]).find(c=>c.name==='passing');
-  const scoring = (data.categories||[]).find(c=>c.name==='scoring');
-  const pickRow = (cat)=> cat && cat.statistics && cat.statistics.find(s=>s.season && s.season.year===SEASON_YEAR);
-  const pRow = pickRow(passing);
-  const sRow = pickRow(scoring);
-  const out = { qbr:null, rtg:null, td:null, int:null, season:null };
-  if(pRow){
-    const iRTG = passing.labels.indexOf('RTG');
-    const iQBR = passing.labels.indexOf('QBR');
-    const iINT = passing.labels.indexOf('INT');
-    out.rtg = iRTG>-1 ? pRow.stats[iRTG] : null;
-    out.qbr = iQBR>-1 ? pRow.stats[iQBR] : null;
-    out.int = iINT>-1 ? pRow.stats[iINT] : null;
-    out.season = pRow.season ? pRow.season.year : null;
-  }
-  if(sRow){
-    const iTD = scoring.labels.indexOf('TD'); // "Total Touchdowns" in scoring category
-    out.td = iTD>-1 ? sRow.stats[iTD] : null;
-  }
+
+  const categories = data.categories || [];
+  const passing = categories.find(c => c.name === 'passing');
+  const rushing = categories.find(c => c.name === 'rushing');
+  const seasonRow = (cat) => cat && cat.statistics
+    ? cat.statistics.find(s => s.season && s.season.year === SEASON_YEAR)
+    : null;
+
+  const passRow = seasonRow(passing);
+  const rushRow = seasonRow(rushing);
+
+  const out = {qbr:null, rtg:null, passTd:null, rushTd:null, td:null, int:null, gp:null};
+
+  out.qbr    = statFromRow(passing, passRow, 'QBR');
+  out.rtg    = statFromRow(passing, passRow, 'RTG');
+  out.int    = statFromRow(passing, passRow, 'INT');
+  out.gp     = statFromRow(passing, passRow, 'GP');
+  out.passTd = statFromRow(passing, passRow, 'TD');
+  out.rushTd = statFromRow(rushing, rushRow, 'TD');
+
+  // Total touchdowns = passing TDs + rushing TDs. ESPN's "scoring" category counts
+  // only TDs the player scored himself, so it misses every touchdown pass.
+  const passTd = num(out.passTd), rushTd = num(out.rushTd);
+  out.td = (passTd === null && rushTd === null) ? null : (passTd ?? 0) + (rushTd ?? 0);
+
   return out;
 }
 
-async function fetchTeamWins(slug){
-  const res = await fetch(`/api/espn?kind=team&value=${encodeURIComponent(slug)}`);
+async function fetchTeamRecord(teamId){
+  const res = await fetch(ESPN_RECORD_URL(teamId), {cache:'no-store'});
   if(!res.ok) throw new Error('espn team request failed');
   const data = await res.json();
   const items = data.items || [];
-  const overall = items.find(i=>i.type==='total' || i.name==='overall') || items[0];
-  if(!overall) return null;
-  const winsStat = (overall.stats||[]).find(s=>s.name==='wins');
-  return winsStat ? winsStat.value : null;
-}
+  const overall = items.find(i => i.type === 'total' || i.name === 'overall') || items[0];
+  if(!overall) return {wins:null, losses:null, ties:null, record:null};
 
-function hasAnyData(playerStats){
-  return FIELDS.some(f=> playerStats[f] !== '' && playerStats[f] != null);
+  const pick = (name) => {
+    const stat = (overall.stats || []).find(s => s.name === name);
+    return stat ? stat.value : null;
+  };
+  return {
+    wins: pick('wins'),
+    losses: pick('losses'),
+    ties: pick('ties'),
+    record: overall.displayValue || null
+  };
 }
 
 async function pullFromESPN(){
@@ -661,35 +772,24 @@ async function pullFromESPN(){
   const statusEl = document.getElementById('espn-status');
   btn.disabled = true;
   statusEl.textContent = 'Pulling latest stats from ESPN…';
+
   try{
-    const [dStats, pStats, dWins, pWins] = await Promise.all([
+    const [dStats, pStats, dRecord, pRecord] = await Promise.all([
       fetchAthleteStats(ESPN_ATHLETE_ID.daniels),
       fetchAthleteStats(ESPN_ATHLETE_ID.prescott),
-      fetchTeamWins(ESPN_TEAM_SLUG.daniels),
-      fetchTeamWins(ESPN_TEAM_SLUG.prescott)
+      fetchTeamRecord(ESPN_TEAM_ID.daniels),
+      fetchTeamRecord(ESPN_TEAM_ID.prescott)
     ]);
 
-    state.current.daniels.qbr = dStats.qbr ?? 0;
-    state.current.daniels.rtg = dStats.rtg ?? 0;
-    state.current.daniels.td = dStats.td ?? 0;
-    state.current.daniels.int = dStats.int ?? 0;
-    state.current.daniels.wins = dWins ?? 0;
-
-    state.current.prescott.qbr = pStats.qbr ?? 0;
-    state.current.prescott.rtg = pStats.rtg ?? 0;
-    state.current.prescott.td = pStats.td ?? 0;
-    state.current.prescott.int = pStats.int ?? 0;
-    state.current.prescott.wins = pWins ?? 0;
-
+    state.current.daniels = Object.assign(emptyStats(), dStats, dRecord);
+    state.current.prescott = Object.assign(emptyStats(), pStats, pRecord);
     state.lastRefreshed = new Date().toISOString();
 
-    setInputs();
     render();
-    saveState();
     const now = new Date();
-    statusEl.textContent = `✓ Pulled 2026 stats from ESPN at ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}. Stats ESPN has not published yet remain 0.`;
+    statusEl.textContent = `✓ ${SEASON_YEAR} stats pulled from ESPN at ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}. Categories ESPN has not published yet show as —.`;
   }catch(e){
-    statusEl.textContent = "Couldn't reach ESPN right now. Try again in a moment, or enter the stats manually below.";
+    statusEl.textContent = "Couldn't reach ESPN right now. Hit refresh again in a moment.";
   }finally{
     btn.disabled = false;
   }
@@ -697,49 +797,8 @@ async function pullFromESPN(){
 
 document.getElementById('espn-btn').addEventListener('click', pullFromESPN);
 
-// wire up inputs
-PLAYERS.forEach(p=>{
-  FIELDS.forEach(f=>{
-    document.getElementById(`in-${p}-${f}`).addEventListener('input', ()=>{
-      getInputs();
-      render();
-      saveState();
-    });
-  });
-});
-document.getElementById('week').addEventListener('input', ()=>{
-  getInputs();
-  saveState();
-});
-
-document.getElementById('save-btn').addEventListener('click', ()=>{
-  getInputs();
-  const d = state.current.daniels, p = state.current.prescott;
-  const scoreDEl = document.getElementById('score-daniels').textContent;
-  const scorePEl = document.getElementById('score-prescott').textContent;
-  state.history.push({
-    week: state.week,
-    timestamp: new Date().toISOString(),
-    daniels: {...d},
-    prescott: {...p},
-    scoreDaniels: scoreDEl,
-    scorePrescott: scorePEl
-  });
-  state.week = state.week + 1;
-  document.getElementById('week').value = state.week;
-  render();
-  saveState();
-});
-
-document.getElementById('reset-btn').addEventListener('click', ()=>{
-  if(!confirm('Reset all current stats and week? Season log history will be kept.')) return;
-  state.current = { daniels: emptyStats(), prescott: emptyStats() };
-  setInputs();
-  render();
-  saveState();
-});
-
-loadState();
+render();
+pullFromESPN();
 </script>
 </body>
 </html>
