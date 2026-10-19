@@ -148,6 +148,33 @@ h1{
   color:rgba(245,243,238,0.55);
   font-weight:500;
 }
+.cardbody{
+  display:flex;
+  align-items:flex-end;
+  gap:14px;
+}
+.cardinfo{flex:1 1 auto;min-width:0;}
+.card .owner{
+  flex:0 0 auto;
+  width:96px;
+  height:128px;
+  object-fit:cover;
+  border-radius:12px;
+  border:2px solid rgba(255,255,255,0.32);
+  box-shadow:0 10px 24px rgba(0,0,0,0.32);
+  background:rgba(255,255,255,0.08);
+}
+/* The source files are already cropped 3:4 and framed on the face. */
+.card .owner{object-position:center top;}
+.card .ownercap{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:rgba(245,243,238,0.55);
+  text-align:center;
+  margin-top:5px;
+}
 .card .scorenote{
   font-family:'JetBrains Mono',monospace;
   font-size:10px;
@@ -160,15 +187,18 @@ h1{
 .card.prescott .score{color:#DCE4EA;}
 .card.leading{box-shadow:0 0 0 2px var(--amber), 0 0 30px rgba(255,138,0,0.25);}
 .card .leadpill{
-  position:absolute;top:16px;right:16px;
+  /* In normal flow rather than pinned to the corner, so it can never collide
+     with the owner portrait on the right of the card. */
+  display:none;
+  align-self:flex-start;
   background:var(--amber);color:#1a0e00;
   font-family:'JetBrains Mono',monospace;
   font-size:10px;font-weight:600;letter-spacing:0.08em;
   padding:3px 8px;border-radius:20px;
   text-transform:uppercase;
-  opacity:0;transition:opacity .2s;
+  margin-bottom:8px;
 }
-.card.leading .leadpill{opacity:1;}
+.card.leading .leadpill{display:inline-block;}
 
 .vs{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -366,12 +396,21 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 
   <div class="matchup">
     <div class="card daniels" id="card-daniels">
-      <div class="leadpill">Leading</div>
-      <div class="tag">Evan "Gordo" Dharia</div>
-      <div class="name">Jayden Daniels</div>
-      <div class="team">Washington Commanders · QB</div>
-      <div class="score"><span id="score-daniels">0</span><span class="of">/ 5</span></div>
-      <div class="scorenote">Categories led</div>
+      <div class="cardbody">
+        <div class="cardinfo">
+          <div class="leadpill">Leading</div>
+          <div class="tag">Evan "Gordo" Dharia</div>
+          <div class="name">Jayden Daniels</div>
+          <div class="team">Washington Commanders · QB</div>
+          <div class="score"><span id="score-daniels">0</span><span class="of">/ 5</span></div>
+          <div class="scorenote">Categories led</div>
+        </div>
+        <div>
+          <img class="owner" src="evan.webp" width="384" height="512"
+               alt="Evan &quot;Gordo&quot; Dharia in a Commanders bib, crying" loading="lazy" decoding="async">
+          <div class="ownercap">Gordo</div>
+        </div>
+      </div>
     </div>
     <div class="vs">
       <div class="line"></div>
@@ -379,12 +418,21 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
       <div class="line"></div>
     </div>
     <div class="card prescott" id="card-prescott">
-      <div class="leadpill">Leading</div>
-      <div class="tag">DG "Baldhead" Archer</div>
-      <div class="name">Dak Prescott</div>
-      <div class="team">Dallas Cowboys · QB</div>
-      <div class="score"><span id="score-prescott">0</span><span class="of">/ 5</span></div>
-      <div class="scorenote">Categories led</div>
+      <div class="cardbody">
+        <div class="cardinfo">
+          <div class="leadpill">Leading</div>
+          <div class="tag">DG "Baldhead" Archer</div>
+          <div class="name">Dak Prescott</div>
+          <div class="team">Dallas Cowboys · QB</div>
+          <div class="score"><span id="score-prescott">0</span><span class="of">/ 5</span></div>
+          <div class="scorenote">Categories led</div>
+        </div>
+        <div>
+          <img class="owner" src="dg.webp" width="384" height="512"
+               alt="DG &quot;Baldhead&quot; Archer in white robes with a halo" loading="lazy" decoding="async">
+          <div class="ownercap">Baldhead</div>
+        </div>
+      </div>
     </div>
   </div>
 
