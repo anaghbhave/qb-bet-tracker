@@ -26,7 +26,7 @@ async function loadScoring() {
   const pure = script.slice(0, script.indexOf("/* ---------- rendering ---------- */"));
   return new Function(
     `${pure}
-     return { state, num, ratioValue, compareCategory, compareRatio, computeResults, betState };`,
+     return { state, num, ratioValue, compareCategory, compareRatio, computeResults, betState, recordFromGameLog };`,
   )();
 }
 
@@ -158,6 +158,85 @@ test("the category leader wins outright; ties do not have to be settled", async 
 
   assert.doesNotMatch(tracker, /clinch/i, "the bet is not a race to three");
   assert.doesNotMatch(tracker, /score[DP] >= 3/);
+});
+
+test("wins count only the games the quarterback actually appeared in", async () => {
+  const { recordFromGameLog } = await loadScoring();
+
+  // Daniels' real 2026 log: he played three games (L, L, T) while Washington
+  // went 1-3-1. The win came in a game he did not appear in, so it is not his.
+  const log = {
+    events: {
+      e1: { gameResult: "L" },
+      e2: { gameResult: "L" },
+      e5: { gameResult: "T" },
+    },
+    seasonTypes: [
+      {
+        displayName: "2026 Regular Season",
+        categories: [
+          { events: [{ eventId: "e1" }, { eventId: "e2" }, { eventId: "e5" }] },
+        ],
+      },
+    ],
+  };
+
+  assert.deepEqual(recordFromGameLog(log), {
+    wins: 0,
+    losses: 2,
+    ties: 1,
+    record: "0-2-1",
+    gamesCounted: 3,
+  });
+});
+
+test("a quarterback who played every game keeps the full record", async () => {
+  const { recordFromGameLog } = await loadScoring();
+
+  // Prescott's real 2026 log: six games, L W L W L L.
+  const results = ["L", "W", "L", "W", "L", "L"];
+  const log = {
+    events: Object.fromEntries(results.map((r, i) => [`e${i}`, { gameResult: r }])),
+    seasonTypes: [
+      {
+        displayName: "2026 Regular Season",
+        categories: [{ events: results.map((_, i) => ({ eventId: `e${i}` })) }],
+      },
+    ],
+  };
+
+  const record = recordFromGameLog(log);
+  assert.equal(record.wins, 2);
+  assert.equal(record.record, "2-4", "no ties, so no third number");
+  assert.equal(record.gamesCounted, 6);
+});
+
+test("preseason games never count toward the record", async () => {
+  const { recordFromGameLog } = await loadScoring();
+
+  const log = {
+    events: { pre1: { gameResult: "W" }, reg1: { gameResult: "L" } },
+    seasonTypes: [
+      { displayName: "2026 Preseason", categories: [{ events: [{ eventId: "pre1" }] }] },
+      { displayName: "2026 Regular Season", categories: [{ events: [{ eventId: "reg1" }] }] },
+    ],
+  };
+
+  assert.deepEqual(recordFromGameLog(log), {
+    wins: 0,
+    losses: 1,
+    ties: 0,
+    record: "0-1",
+    gamesCounted: 1,
+  });
+});
+
+test("a quarterback who has not played yet has no record at all", async () => {
+  const { recordFromGameLog } = await loadScoring();
+
+  const empty = recordFromGameLog({ events: {}, seasonTypes: [] });
+  assert.equal(empty.wins, null, "zero wins and never played are different things");
+  assert.equal(empty.record, null);
 });
 
 test("a category with no data anywhere stays undecided", async () => {

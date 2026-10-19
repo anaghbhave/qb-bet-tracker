@@ -480,10 +480,11 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
     </div>
 
     <div class="stat-row" id="row-wins">
-      <div class="label-col"><span class="label">W</span><span class="fullname">Team Wins</span></div>
+      <div class="label-col"><span class="label">W</span><span class="fullname">Wins in Games He Played</span></div>
       <div class="field" id="fld-daniels-wins"><span class="value" id="val-daniels-wins">—</span><span class="value-sub" id="sub-daniels-wins"></span></div>
       <div class="mid-pill" id="mid-wins">—</div>
       <div class="field" id="fld-prescott-wins"><span class="value" id="val-prescott-wins">—</span><span class="value-sub" id="sub-prescott-wins"></span></div>
+      <div class="ratio-note" id="wins-note">Only games the quarterback actually appeared in count.</div>
     </div>
 
   </div>
@@ -514,9 +515,17 @@ const ESPN_ATHLETE_URL = (athleteId) =>
   `https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/${athleteId}/stats`;
 const ESPN_RECORD_URL = (teamId) =>
   `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON_YEAR}/types/2/teams/${teamId}/record?lang=en&region=us`;
+const ESPN_GAMELOG_URL = (athleteId) =>
+  `https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/${athleteId}/gamelog?season=${SEASON_YEAR}`;
 
 function emptyStats(){
-  return {qbr:null, rtg:null, passTd:null, rushTd:null, td:null, int:null, wins:null, losses:null, ties:null, record:null, gp:null};
+  return {
+    qbr:null, rtg:null, passTd:null, rushTd:null, td:null, int:null, gp:null,
+    // Record in the games this quarterback actually appeared in.
+    wins:null, losses:null, ties:null, record:null, gamesCounted:null,
+    // The team's overall record, shown only for context.
+    teamRecord:null
+  };
 }
 
 let state = {
@@ -599,6 +608,38 @@ function betState(scoreD, scoreP){
   return 'level';
 }
 
+/* The team's record is not the quarterback's. Washington can win a game he sat
+   out, and that win is not his. Walk the game log instead and count only the
+   games he actually appeared in — the log lists a game only if he played. */
+function recordFromGameLog(data){
+  const events = data.events || {};
+  const played = [];
+
+  (data.seasonTypes || []).forEach(seasonType => {
+    // Skip preseason if ESPN ever starts returning it alongside the season.
+    if(/preseason/i.test(seasonType.displayName || '')) return;
+    (seasonType.categories || []).forEach(category => {
+      (category.events || []).forEach(entry => {
+        const event = events[entry.eventId];
+        if(event) played.push(event);
+      });
+    });
+  });
+
+  if(played.length === 0) return {wins:null, losses:null, ties:null, record:null, gamesCounted:null};
+
+  let wins = 0, losses = 0, ties = 0;
+  played.forEach(event => {
+    const result = String(event.gameResult || '').toUpperCase();
+    if(result === 'W') wins++;
+    else if(result === 'L') losses++;
+    else if(result === 'T') ties++;
+  });
+
+  const record = ties > 0 ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;
+  return {wins, losses, ties, record, gamesCounted:played.length};
+}
+
 /* ---------- rendering ---------- */
 
 function setText(id, text){
@@ -629,10 +670,28 @@ function renderValues(){
       : `${num(s.passTd)} pass TD · ${num(s.int)} INT`);
 
     setText(`val-${who}-wins`, fmt(num(s.wins), 0));
-    setText(`sub-${who}-wins`, s.record ? s.record : '');
+    setText(`sub-${who}-wins`, s.record
+      ? `${s.record} in ${s.gamesCounted} GP`
+      : '');
   });
 
+  renderWinsNote();
   return {d, p};
+}
+
+/* Spell out the team-vs-quarterback gap, so a number that looks wrong against
+   the standings explains itself. */
+function renderWinsNote(){
+  const note = document.getElementById('wins-note');
+  const d = state.current.daniels, p = state.current.prescott;
+  if(!d.record && !p.record){
+    note.textContent = 'Only games the quarterback actually appeared in count.';
+    return;
+  }
+  const side = (label, team, s) => s.record
+    ? `${label} ${s.record} in ${s.gamesCounted} GP${s.teamRecord ? ` (${team} ${s.teamRecord} overall)` : ''}`
+    : `${label} has not played`;
+  note.textContent = `Only games the quarterback appeared in count · ${side('Daniels', 'WSH', d)} · ${side('Prescott', 'DAL', p)}`;
 }
 
 function pillText(result, decimals){
@@ -829,18 +888,13 @@ async function fetchTeamRecord(teamId){
   const data = await res.json();
   const items = data.items || [];
   const overall = items.find(i => i.type === 'total' || i.name === 'overall') || items[0];
-  if(!overall) return {wins:null, losses:null, ties:null, record:null};
+  return {teamRecord: overall ? (overall.displayValue || null) : null};
+}
 
-  const pick = (name) => {
-    const stat = (overall.stats || []).find(s => s.name === name);
-    return stat ? stat.value : null;
-  };
-  return {
-    wins: pick('wins'),
-    losses: pick('losses'),
-    ties: pick('ties'),
-    record: overall.displayValue || null
-  };
+async function fetchPlayerRecord(athleteId){
+  const res = await fetch(ESPN_GAMELOG_URL(athleteId), {cache:'no-store'});
+  if(!res.ok) throw new Error('espn gamelog request failed');
+  return recordFromGameLog(await res.json());
 }
 
 async function pullFromESPN(){
@@ -850,15 +904,17 @@ async function pullFromESPN(){
   statusEl.textContent = 'Pulling latest stats from ESPN…';
 
   try{
-    const [dStats, pStats, dRecord, pRecord] = await Promise.all([
+    const [dStats, pStats, dPlayed, pPlayed, dTeam, pTeam] = await Promise.all([
       fetchAthleteStats(ESPN_ATHLETE_ID.daniels),
       fetchAthleteStats(ESPN_ATHLETE_ID.prescott),
+      fetchPlayerRecord(ESPN_ATHLETE_ID.daniels),
+      fetchPlayerRecord(ESPN_ATHLETE_ID.prescott),
       fetchTeamRecord(ESPN_TEAM_ID.daniels),
       fetchTeamRecord(ESPN_TEAM_ID.prescott)
     ]);
 
-    state.current.daniels = Object.assign(emptyStats(), dStats, dRecord);
-    state.current.prescott = Object.assign(emptyStats(), pStats, pRecord);
+    state.current.daniels = Object.assign(emptyStats(), dStats, dPlayed, dTeam);
+    state.current.prescott = Object.assign(emptyStats(), pStats, pPlayed, pTeam);
     state.lastRefreshed = new Date().toISOString();
 
     render();

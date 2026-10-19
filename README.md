@@ -19,13 +19,17 @@ whole tracker is one static HTML file.
 | RTG | ESPN passing category, `RTG` |
 | TD | passing `TD` + rushing `TD` |
 | T:I | passing `TD` ÷ passing `INT` (rushing excluded) |
-| W | team record endpoint, `wins` |
+| W | athlete gamelog, wins in games he appeared in |
 
 Two notes on the scoring, both covered by tests:
 
 - Total touchdowns must add the passing and rushing columns. ESPN's `scoring`
   category has its own `TD` column, but it counts only touchdowns the player
   scored himself, so it misses every touchdown pass.
+- Wins count only the games the quarterback actually appeared in, read from his
+  game log rather than the team's record. Washington can win a game he sat out,
+  and that win is not his — Daniels is 0-2-1 in his three games while the team
+  is 1-3-1. The team's overall record is shown beside the number for context.
 - The TD:INT ratio counts passing touchdowns only. Rushing scores say nothing
   about protecting the ball through the air, so they are excluded here — the TD
   category above still counts them.
