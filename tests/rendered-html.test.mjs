@@ -84,21 +84,40 @@ test("a clean sheet beats a quarterback with picks in the TD:INT category", asyn
   const { compareRatio, ratioValue } = await loadScoring();
 
   // Week 1, 2026: both threw 2 TDs, Prescott threw the only interception.
-  const daniels = { td: 2, int: 0 };
-  const prescott = { td: 2, int: 1 };
+  const daniels = { passTd: 2, int: 0 };
+  const prescott = { passTd: 2, int: 1 };
 
-  assert.equal(ratioValue(daniels.td, daniels.int), Infinity);
-  assert.equal(ratioValue(prescott.td, prescott.int), 2);
+  assert.equal(ratioValue(daniels.passTd, daniels.int), Infinity);
+  assert.equal(ratioValue(prescott.passTd, prescott.int), 2);
   assert.equal(compareRatio(daniels, prescott).winner, "a");
   assert.equal(compareRatio(prescott, daniels).winner, "b");
 });
 
-test("two clean sheets are broken by touchdown count, not called even", async () => {
+test("the TD:INT ratio counts passing touchdowns only, never rushing ones", async () => {
   const { compareRatio } = await loadScoring();
 
-  assert.equal(compareRatio({ td: 5, int: 0 }, { td: 2, int: 0 }).winner, "a");
-  assert.equal(compareRatio({ td: 2, int: 0 }, { td: 5, int: 0 }).winner, "b");
-  assert.equal(compareRatio({ td: 3, int: 0 }, { td: 3, int: 0 }).winner, "push");
+  // Daniels: 3 passing + 2 rushing TDs, 1 pick. Prescott: 4 passing, 1 pick.
+  // On passing alone Prescott wins it 4.00 to 3.00; counting the rushing scores
+  // would wrongly tie them at 5.00 vs 4.00 in Daniels' favour.
+  const daniels = { passTd: 3, rushTd: 2, td: 5, int: 1 };
+  const prescott = { passTd: 4, rushTd: 0, td: 4, int: 1 };
+
+  assert.equal(compareRatio(daniels, prescott).winner, "b");
+  assert.equal(compareRatio(daniels, prescott).marginLabel, "+1.00");
+});
+
+test("two clean sheets are broken by passing touchdown count, not called even", async () => {
+  const { compareRatio } = await loadScoring();
+
+  assert.equal(compareRatio({ passTd: 5, int: 0 }, { passTd: 2, int: 0 }).winner, "a");
+  assert.equal(compareRatio({ passTd: 2, int: 0 }, { passTd: 5, int: 0 }).winner, "b");
+  assert.equal(compareRatio({ passTd: 3, int: 0 }, { passTd: 3, int: 0 }).winner, "push");
+
+  // Rushing scores must not break the tie between two clean sheets either.
+  assert.equal(
+    compareRatio({ passTd: 3, rushTd: 4, int: 0 }, { passTd: 3, rushTd: 0, int: 0 }).winner,
+    "push",
+  );
 });
 
 test("no touchdowns and no picks does not count as a perfect ratio", async () => {
@@ -106,14 +125,14 @@ test("no touchdowns and no picks does not count as a perfect ratio", async () =>
 
   assert.equal(ratioValue(0, 0), 0);
   // A quarterback with 5 TDs and 1 pick beats one who has done nothing.
-  assert.equal(compareRatio({ td: 0, int: 0 }, { td: 5, int: 1 }).winner, "b");
+  assert.equal(compareRatio({ passTd: 0, int: 0 }, { passTd: 5, int: 1 }).winner, "b");
 });
 
 test("scores the real week 1 2026 slate as Daniels 2, Prescott 1, two dead even", async () => {
   const scoring = await loadScoring();
 
-  scoring.state.current.daniels = { qbr: "66.4", rtg: "85.9", td: 2, int: "0", wins: 0 };
-  scoring.state.current.prescott = { qbr: "89.0", rtg: "84.8", td: 2, int: "1", wins: 0 };
+  scoring.state.current.daniels = { qbr: "66.4", rtg: "85.9", td: 2, passTd: 2, int: "0", wins: 0 };
+  scoring.state.current.prescott = { qbr: "89.0", rtg: "84.8", td: 2, passTd: 2, int: "1", wins: 0 };
 
   const results = scoring.computeResults();
   assert.equal(results.qbr.winner, "b", "Prescott's 89.0 QBR tops 66.4");
@@ -144,8 +163,8 @@ test("the category leader wins outright; ties do not have to be settled", async 
 test("a category with no data anywhere stays undecided", async () => {
   const scoring = await loadScoring();
 
-  scoring.state.current.daniels = { qbr: null, rtg: null, td: null, int: null, wins: null };
-  scoring.state.current.prescott = { qbr: null, rtg: null, td: null, int: null, wins: null };
+  scoring.state.current.daniels = { qbr: null, rtg: null, td: null, passTd: null, int: null, wins: null };
+  scoring.state.current.prescott = { qbr: null, rtg: null, td: null, passTd: null, int: null, wins: null };
 
   const results = scoring.computeResults();
   assert.deepEqual(score(results), { daniels: 0, prescott: 0, even: 0 });

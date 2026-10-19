@@ -18,7 +18,7 @@ whole tracker is one static HTML file.
 | QBR | ESPN passing category, `QBR` |
 | RTG | ESPN passing category, `RTG` |
 | TD | passing `TD` + rushing `TD` |
-| T:I | total TDs ÷ passing `INT` |
+| T:I | passing `TD` ÷ passing `INT` (rushing excluded) |
 | W | team record endpoint, `wins` |
 
 Two notes on the scoring, both covered by tests:
@@ -26,9 +26,12 @@ Two notes on the scoring, both covered by tests:
 - Total touchdowns must add the passing and rushing columns. ESPN's `scoring`
   category has its own `TD` column, but it counts only touchdowns the player
   scored himself, so it misses every touchdown pass.
-- A clean sheet (touchdowns, zero interceptions) is an infinite ratio and beats any
-  quarterback who has thrown a pick. Two clean sheets are split by touchdown count.
-  Zero touchdowns and zero picks is not a clean sheet.
+- The TD:INT ratio counts passing touchdowns only. Rushing scores say nothing
+  about protecting the ball through the air, so they are excluded here — the TD
+  category above still counts them.
+- A clean sheet (touchdown passes, zero interceptions) is an infinite ratio and
+  beats any quarterback who has thrown a pick. Two clean sheets are split by
+  passing touchdown count. Zero touchdowns and zero picks is not a clean sheet.
 
 ## Layout
 

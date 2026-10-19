@@ -472,11 +472,11 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
     </div>
 
     <div class="stat-row" id="row-ratio">
-      <div class="label-col"><span class="label">T:I</span><span class="fullname">TD-to-INT Ratio</span></div>
+      <div class="label-col"><span class="label">T:I</span><span class="fullname">Passing TD-to-INT Ratio</span></div>
       <div class="field" id="fld-daniels-ratio"><span class="value" id="val-daniels-ratio">—</span><span class="value-sub" id="sub-daniels-ratio"></span></div>
       <div class="mid-pill" id="mid-ratio">—</div>
       <div class="field" id="fld-prescott-ratio"><span class="value" id="val-prescott-ratio">—</span><span class="value-sub" id="sub-prescott-ratio"></span></div>
-      <div class="ratio-note">Total TDs ÷ interceptions. A clean sheet (TDs, zero picks) shows ∞ and is broken by TD count.</div>
+      <div class="ratio-note">Passing TDs ÷ interceptions — rushing scores do not count here. A clean sheet (TD passes, zero picks) shows ∞ and is broken by passing TD count.</div>
     </div>
 
     <div class="stat-row" id="row-wins">
@@ -565,11 +565,14 @@ function compareCategory(a, b, decimals){
 }
 
 /* The T:I category needs its own tiebreak: two clean sheets are split by TD count. */
+/* Passing touchdowns only — a quarterback's rushing scores say nothing about how
+   well he protects the ball through the air, so they are left out of this one.
+   The TD category above still counts them. */
 function compareRatio(d, p){
-  const dv = ratioValue(d.td, d.int);
-  const pv = ratioValue(p.td, p.int);
+  const dv = ratioValue(d.passTd, d.int);
+  const pv = ratioValue(p.passTd, p.int);
   if(dv === Infinity && pv === Infinity){
-    const result = compareCategory(num(d.td), num(p.td), 0);
+    const result = compareCategory(num(d.passTd), num(p.passTd), 0);
     if(result.winner === 'push') return result;
     return {winner:result.winner, margin:result.margin, marginLabel:result.marginLabel + ' TD'};
   }
@@ -619,11 +622,11 @@ function renderValues(){
       ? ''
       : `${num(s.passTd) ?? 0} pass · ${num(s.rushTd) ?? 0} rush`);
 
-    const rv = ratioValue(s.td, s.int);
+    const rv = ratioValue(s.passTd, s.int);
     setText(`val-${who}-ratio`, rv === null ? '—' : (rv === Infinity ? '∞' : rv.toFixed(2)));
-    setText(`sub-${who}-ratio`, s.td === null || s.int === null
+    setText(`sub-${who}-ratio`, s.passTd === null || s.int === null
       ? ''
-      : `${num(s.td)} TD · ${num(s.int)} INT`);
+      : `${num(s.passTd)} pass TD · ${num(s.int)} INT`);
 
     setText(`val-${who}-wins`, fmt(num(s.wins), 0));
     setText(`sub-${who}-wins`, s.record ? s.record : '');
