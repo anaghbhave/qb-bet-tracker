@@ -108,6 +108,8 @@ h1{
   padding:20px 18px;
   position:relative;
   overflow:hidden;
+  display:flex;
+  flex-direction:column;
   border:1px solid rgba(255,255,255,0.18);
   color:#F8F6F0;
   box-shadow:0 18px 40px rgba(23,25,29,0.16);
@@ -152,6 +154,7 @@ h1{
   display:flex;
   align-items:flex-end;
   gap:14px;
+  flex:1 1 auto;
 }
 .cardinfo{flex:1 1 auto;min-width:0;}
 .card .owner{
@@ -188,9 +191,10 @@ h1{
 .card.leading{box-shadow:0 0 0 2px var(--amber), 0 0 30px rgba(255,138,0,0.25);}
 .card .leadpill{
   /* In normal flow rather than pinned to the corner, so it can never collide
-     with the owner portrait on the right of the card. */
-  display:none;
-  align-self:flex-start;
+     with the owner portrait. Hidden with visibility, not display, so it keeps
+     its row on both cards and the two text blocks stay in step. */
+  display:inline-block;
+  visibility:hidden;
   background:var(--amber);color:#1a0e00;
   font-family:'JetBrains Mono',monospace;
   font-size:10px;font-weight:600;letter-spacing:0.08em;
@@ -198,7 +202,7 @@ h1{
   text-transform:uppercase;
   margin-bottom:8px;
 }
-.card.leading .leadpill{display:inline-block;}
+.card.leading .leadpill{visibility:visible;}
 
 .vs{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
